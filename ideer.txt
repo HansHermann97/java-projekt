@@ -2,3 +2,7 @@ pixel art a la minecraft
 guns der attacher til main char
 tårne 
 minions kan skyde tilbage?
+HP bar: fillRect (size * HP /100) i bunden til højre
+abstract klasser: Tower, Weapon, etc.
+i Player: attachable() {nederst først, dernæst, etc., tårne øverst}
+penge i movebox (bruges til at købe nye ting), XP i hvert tårn og player (bruges til opgraderinger af den entitet)

@@ -10,8 +10,8 @@ import dk.HansHermann.movebox.Projectile;
 public class Player {
     private double relativeX = 0.1; // Relative position (10% of the window width)
     private double relativeY = 0.1; // Relative position (10% of the window height)
-    private double relativeSize = 0.05; // Relative size (5% of the window width)
-    private double relativeSpeed = 0.01; // Relative speed (1% of the window width per frame)
+    private double relativeSize = 0.03; // Relative size (5% of the window width)
+    private double relativeSpeed = 0.001; // Relative speed (1% of the window width per frame)
 
     private double dx = 0;
     private double dy = 0;
@@ -19,9 +19,12 @@ public class Player {
     private List<Projectile> projectiles = new ArrayList<>();
     private Set<Integer> activeKeys = new HashSet<>();
 
+    private int damage;
+
     public Player(double startX, double startY) {
         this.relativeX = startX;
         this.relativeY = startY;
+        damage = 1;
     }
 
     public void draw(Graphics g, int windowWidth, int windowHeight) {
@@ -89,13 +92,18 @@ public class Player {
         int actualX = (int) (relativeX * windowWidth);
         int actualY = (int) (relativeY * windowHeight);
         int actualSize = (int) (relativeSize * windowWidth);
-        projectiles.add(new Projectile(actualX + actualSize / 2, actualY + actualSize / 2, mouseX, mouseY));
+        projectiles.add(new Projectile(actualX + actualSize / 2, actualY + actualSize / 2, mouseX, mouseY, damage));
     }
+
+    public List<Projectile> getProjectiles() {
+        return projectiles;
+    }
+
 
     public double getRelativeX() {
         return relativeX;
     }
-    
+
     public double getRelativeY() {
         return relativeY;
     }

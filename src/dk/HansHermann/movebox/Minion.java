@@ -8,8 +8,9 @@ public class Minion {
     private double relativeX, relativeY; //position
     private double dx, dy; //direction vector
     private double relativeSize = 0.01; // size of minion
-    private double SPEED = 0.01;
-    private double hitPoints = 1;
+    private double SPEED = 0.0002;
+    private int startHitPoints = 5;
+    private int hitPoints = 5;
 
     private List<Point> waypoints = new ArrayList<>();
     private int currentWaypointIndex = 0;
@@ -37,23 +38,23 @@ public class Minion {
                         + (targetY - relativeY) * (targetY - relativeY));
 
             // Check if distance is zero to avoid division by zero
-        if (distance == 0) {
+        if (distance < 0.001) {
             currentWaypointIndex++;
             relativeX = targetX; // Snap to the waypoint
             relativeY = targetY;
-            System.out.println("Reached waypoint " + currentWaypointIndex);
             return;
         }
 
-        dx = SPEED * (targetX - relativeX) / distance;
-        dy = SPEED * (targetY - relativeY) / distance;
+        //normalizing direction vector, to make speed continual
+        double directionX = (targetX - relativeX) / distance;
+        double directionY = (targetY - relativeY) / distance;
+        //updating direction vector with speed
+        dx = SPEED * directionX;
+        dy = SPEED * directionY;
 
         //move towards the target
         relativeX += dx;
         relativeY += dy;
-
-        System.out.println("Moving to waypoint " + currentWaypointIndex +
-                        ": relativeX=" + relativeX + ", relativeY=" + relativeY);
 
         //check if minion has reached the current waypoint
         if  (Math.abs(relativeX - targetX) < SPEED
@@ -61,22 +62,50 @@ public class Minion {
             currentWaypointIndex++;
             relativeX = targetX; // snap to the waypoint
             relativeY = targetY;
-            System.out.println("Reached waypoint " + currentWaypointIndex);
             }
         } else {
             // minion has reached the end of the path
             dx = 0;
             dy = 0;
-            System.out.println("Reached the end of the path");
         }
     }
 
     public void draw(Graphics g, int windowWidth, int windowHeight) {
-        int actualX = (int) (relativeX * windowWidth);
-        int actualY = (int) (relativeY * windowHeight);
-        int actualSize = (int) (relativeSize * windowWidth);
+        g.setColor(Color.WHITE);
+        g.fillRect(getActualX(windowWidth), getActualY(windowHeight), getActualSize(windowWidth), getActualSize(windowWidth));
 
+        //draw hitpoints bar
+        drawHPBar(g, windowWidth, windowHeight);
+    }
+
+    public void drawHPBar(Graphics g, int windowWidth, int windowHeight) {
         g.setColor(Color.RED);
-        g.fillRect(actualX, actualY, actualSize, actualSize);
+        //calculate the width of the HP bar:
+        int currentHitPointBar = 20 * hitPoints/startHitPoints;
+        g.fillRect(getActualX(windowWidth)-4, getActualY(windowHeight)+20, currentHitPointBar, 4);
+    }
+
+    public Rectangle getHitbox(int windowWidth, int windowHeight) {
+        return new Rectangle(getActualX(windowWidth), getActualY(windowHeight), getActualSize(windowWidth), getActualSize(windowWidth));
+    }
+
+    public double getHitPoints() {
+        return hitPoints;
+    }
+
+    public void hit(int damage) {
+        hitPoints -= damage;
+    }
+
+    public int getActualX(int windowWidth) {
+        return (int) (relativeX * windowWidth);
+    }
+
+    public int getActualY(int windowHeight) {
+        return (int) (relativeY * windowHeight);
+    }
+
+    public int getActualSize(int windowWidth) {
+        return (int) (relativeSize * windowWidth);
     }
 }
