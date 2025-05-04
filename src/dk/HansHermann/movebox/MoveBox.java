@@ -5,11 +5,12 @@ import java.awt.event.*;
 import java.util.List;
 import java.util.ArrayList;
 
-public class MoveBox extends JPanel implements KeyListener, MouseListener{
+public class MoveBox extends JPanel implements KeyListener, MouseListener, MouseMotionListener{
     private Player player = new Player(0.1, 0.1);
     private List<Minion> minions = new ArrayList<>();
     private int spawnCounter = 0;
-    private Timer timer;
+    private Timer timer, shootingTimer;
+    private Point cursorPosition;
     private static int screenWidth = 1200;
     private static int screenHeight = 800;
 
@@ -19,6 +20,7 @@ public class MoveBox extends JPanel implements KeyListener, MouseListener{
         requestFocusInWindow();
         addKeyListener(this);
         addMouseListener(this);
+        addMouseMotionListener(this);
 
         //game loop timer:
         timer = new Timer(5, e -> {
@@ -89,15 +91,43 @@ public class MoveBox extends JPanel implements KeyListener, MouseListener{
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        player.shoot(e.getX(), e.getY(), getWidth(), getHeight());
+        playerShoot(e);
     }
 
+    public void playerShoot(MouseEvent e) {
+        player.shoot(cursorPosition.x, cursorPosition.y, getWidth(), getHeight());
+    }
+    @Override public void mousePressed(MouseEvent e) {
+        //shoot while holding down left click
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            cursorPosition = e.getPoint(); // Store the initial cursor position
+            shootingTimer = new Timer(500, _ -> {
+                if(cursorPosition != null) {
+                    playerShoot(e);
+                }
+            });
+            shootingTimer.start();
+        }
+    }
+    @Override public void mouseReleased(MouseEvent e) {
+        //stop shooting
+        shootingTimer.stop();
+    }
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        // Update the cursor position while moving the mouse
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            cursorPosition = e.getPoint();
+        }
+    }
     @Override public void keyTyped(KeyEvent e){}
-    @Override public void mousePressed(MouseEvent e) {}
-    @Override public void mouseReleased(MouseEvent e) {}
     @Override public void mouseEntered(MouseEvent e) {}
     @Override public void mouseExited(MouseEvent e) {}
-
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        // Update the cursor position while dragging the mouse
+        cursorPosition = e.getPoint();
+    }
     public static void main(String[] args) {
         JFrame frame = new JFrame("Flyt spilleren");
         MoveBox game = new MoveBox();
